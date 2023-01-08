@@ -41,6 +41,7 @@ import org.apache.tomcat.util.buf.ByteChunk;
 import org.apache.tomcat.util.buf.MessageBytes;
 import org.apache.tomcat.util.descriptor.web.LoginConfig;
 import org.apache.tomcat.util.http.MimeHeaders;
+import org.owasp.encoder.Encode;
 
 /**
  * An <b>Authenticator</b> and <b>Valve</b> implementation of FORM BASED
@@ -659,7 +660,8 @@ public class FormAuthenticator
         Cookie cookies[] = request.getCookies();
         if (cookies != null) {
             for (Cookie cookie : cookies) {
-                saved.addCookie(cookie);
+            	cookie.setValue(Encode.forHtml(cookie.getValue()));
+            	saved.addCookie(cookie);
             }
         }
         Enumeration<String> names = request.getHeaderNames();

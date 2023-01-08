@@ -49,7 +49,7 @@ public class DigestAuthenticator extends Authenticator {
 
         String nonce = parameterMap.get("nonce");
         String messageQop = parameterMap.get("qop");
-        String algorithm = parameterMap.get("algorithm") == null ? "MD5" : parameterMap.get("algorithm");
+        String algorithm = parameterMap.get("algorithm") == null ? "SHA-256" : parameterMap.get("algorithm");
         String opaque = parameterMap.get("opaque");
 
         StringBuilder challenge = new StringBuilder();
@@ -103,10 +103,10 @@ public class DigestAuthenticator extends Authenticator {
         StringBuilder preDigest = new StringBuilder();
         String A1;
 
-        if (algorithm.equalsIgnoreCase("MD5")) {
+        if (algorithm.equalsIgnoreCase("SHA-256")) {
             A1 = userName + ":" + realm + ":" + password;
         } else {
-            A1 = encodeMD5(userName + ":" + realm + ":" + password) + ":" + nonce + ":" + cNonce;
+            A1 = encodeSHA256(userName + ":" + realm + ":" + password) + ":" + nonce + ":" + cNonce;
         }
 
         /*
@@ -116,7 +116,7 @@ public class DigestAuthenticator extends Authenticator {
          */
         String A2 = "GET:" + requestUri;
 
-        preDigest.append(encodeMD5(A1));
+        preDigest.append(encodeSHA256(A1));
         preDigest.append(':');
         preDigest.append(nonce);
 
@@ -130,18 +130,31 @@ public class DigestAuthenticator extends Authenticator {
         }
 
         preDigest.append(':');
-        preDigest.append(encodeMD5(A2));
+        preDigest.append(encodeSHA256(A2));
 
-        return encodeMD5(preDigest.toString());
+        return encodeSHA256(preDigest.toString());
 
     }
 
-    private String encodeMD5(String value) throws NoSuchAlgorithmException {
+    private String encodeSHA256(String value) throws NoSuchAlgorithmException {
         byte[] bytesOfMessage = value.getBytes(StandardCharsets.ISO_8859_1);
-        MessageDigest md = MessageDigest.getInstance("MD5");
+        MessageDigest md = MessageDigest.getInstance("SHA-256");
         byte[] thedigest = md.digest(bytesOfMessage);
 
-        return MD5Encoder.encode(thedigest);
+        // return MD5Encoder.encode(thedigest);
+        return bytesToHex(thedigest);
+    }
+    
+    private static String bytesToHex(byte[] hash) {
+        StringBuilder hexString = new StringBuilder(2 * hash.length);
+        for (int i = 0; i < hash.length; i++) {
+            String hex = Integer.toHexString(0xff & hash[i]);
+            if(hex.length() == 1) {
+                hexString.append('0');
+            }
+            hexString.append(hex);
+        }
+        return hexString.toString();
     }
 
     @Override

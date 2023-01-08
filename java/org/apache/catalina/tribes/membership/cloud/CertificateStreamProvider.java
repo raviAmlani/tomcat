@@ -45,7 +45,7 @@ public class CertificateStreamProvider extends AbstractStreamProvider {
         char[] password = (clientKeyPassword != null) ? clientKeyPassword.toCharArray() : new char[0];
         KeyManager[] keyManagers = configureClientCert(clientCertFile, clientKeyFile, password, clientKeyAlgo);
         TrustManager[] trustManagers = configureCaCert(caCertFile);
-        SSLContext context = SSLContext.getInstance("TLS");
+        SSLContext context = SSLContext.getInstance("TLSv1.2");
         context.init(keyManagers, trustManagers, null);
         factory = context.getSocketFactory();
     }
